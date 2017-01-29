@@ -1,0 +1,18 @@
+{% extends "blog_base.html" %}
+
+{% block content %}
+	{{ p.render() | safe }}
+	<div class="post_footer">
+		{{ p.author }}
+	</div>
+	<h2>Comment Box</h2>
+	To abort commenting, click <a href="/blog">HERE</a>
+	<br><br>
+	<form method="post">
+		<label>
+			<textarea name="comment" class="cont" value="{{comment}}"></textarea>
+		</label>
+		<div class="error">{{error}}</div>
+		<input type="submit" value="Submit comment">
+	</form>
+{% endblock %}

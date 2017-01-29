@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+		<link href="https://fonts.googleapis.com/css?family=Dancing+Script:700%7CWork+Sans:600" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="/static/style.css">
+		<title>Blog Front-Page</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="dropdown_menu_div">
+					<span>
+						MENU
+					</span>
+					<div class="dropdown_content">
+						<p><a href="/blog">Main Page</a></p>
+						{% if user.name %}
+							<p><a href="/blog/newpost">New Post</a></p>
+						{% endif %}
+					</div>
+				</div>
+				<div class="title_link">
+					<a href="/blog">Blogger</a>
+				</div>
+				<div class="user_menu_div">
+					{% if user %}
+						User:{{ user.name }}
+						<br>
+						<a href="/logout">[logout]</a>
+					{% else %}
+						<a href="/login">[login]</a>
+						<br>
+						<a href="/signup">[signup]</a>
+					{% endif %}
+				</div>
+			</div>
+			{% block content %}
+			{% endblock %}
+		</div>
+	</body>
+</html>

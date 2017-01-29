@@ -1,0 +1,59 @@
+{% extends "blog_base.html" %}
+
+{% block content %}
+	<br>
+	<br>
+	<h1 style=" background-color: #eee; color: #777; margin-bottom: 5px; height :50px;">Sign-Up</h1>
+	<h2> Please fill up the below given forms</h2>
+	<br>
+	<br>
+	<form method="post">
+		<table>
+			<tr>
+				<td class="label">
+					UserName
+				</td>
+				<td>
+					<input name="username" type="text" value="{{username}}">
+				</td>
+				<td class="error">
+					{{error_username}}
+				</td>
+			</tr>
+			<tr>
+				<td class="label">
+					Password
+				</td>
+				<td>
+					<input name="password" type="password" required">
+				</td>
+				<td class="error">
+					{{error_password}}
+				</td>
+			</tr>
+			<tr>
+				<td class="label">
+					Verify Password
+				</td>
+				<td>
+					<input name="verify" type="password" required">
+				</td>
+				<td class="error">
+					{{error_verify}}
+				</td>
+			</tr>
+			<tr>
+				<td class="label">
+					Email-Id(Optional)
+				</td>
+				<td>
+					<input name="email" type="text" value="{{email}}">
+				</td>
+				<td class="error">
+					{{error_email}}
+				</td>
+			</tr>
+		</table>
+		<input type="submit">
+	</form>
+{% endblock %}

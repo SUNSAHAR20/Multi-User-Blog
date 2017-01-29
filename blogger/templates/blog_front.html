@@ -1,0 +1,87 @@
+{% extends "blog_base.html" %}
+
+{% block content %}
+	<div align="center">
+		{{ message }}
+	</div>
+	{% for p in posts %}
+		{{ p.render() | safe }}
+		<div class="post_footer">
+		{{ p.author }}
+		<br><br>
+		{% if user.name %}
+			{% if p.author == user.name %}
+				<form action="/blog/edit/{{p.key().id()}}" class="edit_btn">
+					<input type="submit" value="Edit Post">
+				</form>
+				<form method="get" class="delete_btn" action="/blog/delete/{{p.key().id()}}">
+					<input type="submit" value="Delete Post">
+				</form>
+				<br><br>
+			{% endif %}
+		{% endif %}
+
+		{% if p.likes == 1 %}
+			{{ p.likes }} user likes the post
+		{% else %}
+			{{ p.likes }} users like the post
+		{% endif %}
+		<br>
+		{% if p.dislikes == 1 %}
+			{{ p.dislikes }} user dislikes the post
+		{% else %}
+			{{ p.dislikes }} users dislike the post
+		{% endif %}
+
+		<br><br>
+
+		{% if user.name %}
+			<form method="get" action="/blog/newcomment/{{p.key().id()}}">
+				<input type="submit" value="Comment on Post">
+			</form>
+
+			{% if p.author != user.name %}
+				{% if user.name not in p.likers %}
+					<form method="post" action="/blog/like/{{p.key().id()}}">
+						<input type="submit" value="Like" name="ulike">
+					</form>
+				{% endif %}
+				{% if user.name not in p.dislikers %}
+					<form method="post" action="/blog/dislike/{{p.key().id()}}">
+						<input type="submit" value="Dislike" name="ulike">
+					</form>
+				{% endif %}
+			{% endif %}
+			<br>
+			<div class="post_comment">
+				{% for c in comments %}
+					{% if c.commentid == p.key().id() %}
+						<div class="comment">
+							<br>
+							<span class="comment_content">
+								{{ c.comment | safe }}
+							</span>
+							<br><br>
+							<span class="comment_sign">
+								by {{ c.commentauthor }} on {{ c.created.strftime("%b %d, %Y") }}
+							</span>
+							<br><br>
+							{% if c.commentauthor == user.name %}
+								<form method="get" action="/blog/editcomment/{{c.key().id()}}">
+									<input type="submit" value="Edit comment" class="edit_btn">
+								</form>
+								<form method="get" action="/blog/deletecomment/{{c.key().id()}}">
+									<input type="submit" value="Delete Comment" class="delete_btn">
+								</form>
+							{% endif %}
+							<br><br>
+						</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+		{% endif %}
+		</div>
+		<br><br>
+	{% endfor %}
+
+{% endblock %}
