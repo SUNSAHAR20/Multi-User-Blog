@@ -26,13 +26,18 @@
 				</div>
 				<div class="user_menu_div">
 					{% if user %}
-						User:{{ user.name }}
+						{{ user.name }}
 						<br>
-						<a href="/logout">[logout]</a>
+						<form action='/logout'>
+							<input type="submit" value="Logout">
+						</form>
 					{% else %}
-						<a href="/login">[login]</a>
-						<br>
-						<a href="/signup">[signup]</a>
+						<form action='/login' class='login'>
+							<input type="submit" value="Login">
+						</form>
+						<form action='/signup' class='signup'>
+							<input type="submit" value="Signup">
+						</form>
 					{% endif %}
 				</div>
 			</div>

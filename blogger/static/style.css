@@ -19,7 +19,7 @@ body{
 	position: relative;
 	margin: 20px 0 20px 0;
 	height: 40px;
-	width: 22.5%;
+	width: 10%;
 	font-size: 14px;
 	text-align: center;
 }
@@ -44,14 +44,15 @@ body{
 	text-align: center;
 	margin-bottom: 30px 0 30px 0;
 	text-decoration: none;
+	width: 60%;
 }
 
 .user_menu_div {
 	display: inline-block;
 	margin: 20px 0 20px 0;
 	height: 40px;
-	width: 22.5%;
-	font-size: 14px;
+	width: 25%;
+	font-size: 20px;
 	text-align: center;
 }
 
@@ -69,6 +70,21 @@ a:link {
 a:visited {
 	text-decoration: none;
 	color: green;
+}
+
+.logout {
+	color: red;
+}
+
+.login {
+	display: inline;
+	color: blue;
+}
+
+.signup{
+	display: inline;
+	color: green;
+	float: right;
 }
 
 .error {
@@ -103,7 +119,7 @@ textarea.cont {
 }
 
 input[type=submit] {
-	font-size: 24px;
+	font-size: 18px;
 }
 
 .newpost{
@@ -116,32 +132,29 @@ input[type=submit] {
 	margin-top: 15px;
 }
 
-.post-heading {
-	position: relative;
+.post_heading {
 	border-bottom: 2px solid #666;
 }
 
-.post-title {
+.post_title {
 	font-size: 24px;
 	font-weight: bold;
 	text-align: left;
-	width: 49%;
 }
 
-.post-date {
+.post_date {
 	display: inline;
 	float: right;
-	width: 50%;
 	text-align: right;
 	color: #999;
 }
 
 .post_content {
-	margin-top: 5px;
+	margin-top: 3px;
 }
 
 .post_footer {
-	font-size: 0.8em;
+	font-size: 12px;
 	color: red;
 	text-align: right;
 	border-bottom: 1px solid white;
@@ -155,7 +168,7 @@ input[type=submit] {
 .comment {
 	width: 80%;
 	margin: 0 auto;
-	border-top: 1px dotted gray;
+	border-top: 2px dotted gray;
 }
 
 .comment_content {
@@ -163,10 +176,6 @@ input[type=submit] {
 	text-align: left;
 	font-family: times;
 	color: green;
-}
-
-.comment_sign {
-
 }
 
 .edit_btn {

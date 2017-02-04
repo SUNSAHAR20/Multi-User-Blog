@@ -94,7 +94,7 @@ class User(db.Model):
 
 	@classmethod
 	def by_name(cls, name):
-		u = User.all().filter('name=', name).get()
+		u = User.all().filter('name =', name).get()
 		return u
 
 	@classmethod
@@ -250,9 +250,6 @@ class PostCreate(BaseHandler):
 	def get(self):
 		if self.user:
 			self.render("blog_forms.html")
-		else:
-			error = "Login to write a post"
-			self.render('login.html', error=error)
 
 	def post(self):
 		if not self.user:
@@ -306,9 +303,6 @@ class EditPost(BaseHandler):
 				error = "Please fill up subject and content fields!"
 				self.render("blog_edit.html", p=p, subject=subject, content=content,
 							 error=error)
-		else:
-			error = "Login to edit your post!"
-			return self.render('login.html', error=error)
 
 class LikeHandler(BaseHandler):
 	"""class that handles likes for a blogpost, updating the posts number of
@@ -324,8 +318,6 @@ class LikeHandler(BaseHandler):
 			p.put()
 			time.sleep(0.1)
 			self.redirect("/blog")
-		else:
-			print "You cannot like your Own Post!!"
 
 class DislikeHandler(BaseHandler):
 	def post(self, post_id):
@@ -339,8 +331,6 @@ class DislikeHandler(BaseHandler):
 			p.put()
 			time.sleep(0.1)
 			self.redirect("/blog")
-		else:
-			print "You cannot dislike your Own Post!!"
 
 class DeletePost(BaseHandler):
 	"""class for deleting a blog post"""
@@ -352,9 +342,6 @@ class DeletePost(BaseHandler):
 			p.delete()
 			message = "Post Deleted!"
 			self.render("blog_front.html", p=p, message=message)
-		else:
-			error = "You can only delete your own posts!"
-			return self.render("login.html", error=error)
 
 class Comment(db.Model):
 	"""class that creates the basic database specifics for a comment"""
@@ -372,9 +359,6 @@ class CreateComment(BaseHandler):
 		if self.user:
 			self.render("newcomment.html", p=p, subject=p.subject,
 						content=p.content)
-		else:
-			error = "Login to comment posts!"
-			return self.render('login.html', error=error)
 
 	def post(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
@@ -410,9 +394,6 @@ class EditComment(BaseHandler):
 
 		if self.user:
 			self.render("editcomment.html", c=c, commented=commented)
-		else:
-			error = "Login to comment posts!"
-			return self.render('login.html', error=error)
 
 	def post(self, comment_id):
 		key = db.Key.from_path('Comment', int(comment_id))
@@ -440,14 +421,9 @@ class DeleteComment(BaseHandler):
 		key = db.Key.from_path('Comment', int(comment_id))
 		c = db.get(key)
 
-		if self.user.name == c.commentauthor:
-			c.delete()
-			message = "Comment Deleted!"
-			self.render("blog.html", c=c, message=message)
-		else:
-			error = "You can only delete your own posts!"
-			return self.render("login.html", error=error)
-
+		c.delete()
+		message = "Comment Deleted!"
+		self.render("blog_front.html", c=c, message=message)
 
 app = webapp2.WSGIApplication([('/', FirstPage),
 							 ('/blog', Blog),

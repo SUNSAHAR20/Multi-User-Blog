@@ -36,22 +36,29 @@
 		<br><br>
 
 		{% if user.name %}
-			<form method="get" action="/blog/newcomment/{{p.key().id()}}">
+			<form method="get" action="/blog/newcomment/{{p.key().id()}}" class="edit_btn">
 				<input type="submit" value="Comment on Post">
 			</form>
+		<br><br>
 
 			{% if p.author != user.name %}
 				{% if user.name not in p.likers %}
-					<form method="post" action="/blog/like/{{p.key().id()}}">
-						<input type="submit" value="Like" name="ulike">
-					</form>
+					{% if user.name not in p.dislikers %}
+						<form method="post" action="/blog/like/{{p.key().id()}}" class="delete_btn">
+							<input type="submit" value="Like" name="ulike">
+						</form>
+					{% endif %}
 				{% endif %}
 				{% if user.name not in p.dislikers %}
-					<form method="post" action="/blog/dislike/{{p.key().id()}}">
-						<input type="submit" value="Dislike" name="ulike">
-					</form>
+					{% if user.name not in p.likers %}
+						<form method="post" action="/blog/dislike/{{p.key().id()}}">
+							<input type="submit" value="Dislike" name="ulike">
+						</form>
+					{% endif %}
 				{% endif %}
 			{% endif %}
+		{% endif %}
+
 			<br>
 			<div class="post_comment">
 				{% for c in comments %}
@@ -66,20 +73,21 @@
 								by {{ c.commentauthor }} on {{ c.created.strftime("%b %d, %Y") }}
 							</span>
 							<br><br>
-							{% if c.commentauthor == user.name %}
-								<form method="get" action="/blog/editcomment/{{c.key().id()}}">
-									<input type="submit" value="Edit comment" class="edit_btn">
-								</form>
-								<form method="get" action="/blog/deletecomment/{{c.key().id()}}">
-									<input type="submit" value="Delete Comment" class="delete_btn">
-								</form>
+							{% if user.name %}
+								{% if c.commentauthor == user.name %}
+									<form method="get" action="/blog/editcomment/{{c.key().id()}}">
+										<input type="submit" value="Edit comment" class="edit_btn">
+									</form>
+									<form method="get" action="/blog/deletecomment/{{c.key().id()}}">
+										<input type="submit" value="Delete Comment" class="delete_btn">
+									</form>
+								{% endif %}
 							{% endif %}
 							<br><br>
 						</div>
 					{% endif %}
 				{% endfor %}
 			</div>
-		{% endif %}
 		</div>
 		<br><br>
 	{% endfor %}
