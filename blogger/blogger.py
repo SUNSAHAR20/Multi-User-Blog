@@ -7,10 +7,12 @@ import time
 import hashlib
 import hmac
 from string import letters
+from user import User
+from comment import Comment
 SECRET = 'imsosecret'
 from google.appengine.ext import db
 
-		#For loading the jijnja2 template into the app
+        #For loading the jijnja2 template into the app
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=True)
 
@@ -28,8 +30,8 @@ def check_secure_val(h):
 
 		#Function for not class BaseHandler string rendering
 def render_str(template, ** params):
-	t = jinja_env.get_template(template)
-	return t.render(params)
+    t = jinja_env.get_template(template)
+    return t.render(params)
 
 		#Main Page Basehandler(Templates)
 class BaseHandler(webapp2.RequestHandler):
@@ -63,52 +65,11 @@ class BaseHandler(webapp2.RequestHandler):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
 
 		#Functions for salting
-def make_salt():
-	return ''.join(random.choice(letters) for x in xrange(5))
-
-def make_pw_hash(name, pw, salt=None):
-	if not salt:
-		salt = make_salt()
-	h = hashlib.sha256(name + pw + salt).hexdigest()
-	return '%s,%s' % (salt, h)
-
-def valid_pw(name, password, h):
-	salt = h.split(',')[0]
-	if h == make_pw_hash(name, password, salt):
-		return True
 
 		#Class to direct to right blog page
 class FirstPage(BaseHandler):
 	def get(self):
 		self.render("firstpage.html")
-
-		#Class for creating a User object
-class User(db.Model):
-	name = db.StringProperty(required = True)
-	pw_hash = db.StringProperty(required = True)
-	email = db.StringProperty()
-
-	@classmethod
-	def by_id(cls, uid):
-		return User.get_by_id(uid)
-
-	@classmethod
-	def by_name(cls, name):
-		u = User.all().filter('name =', name).get()
-		return u
-
-	@classmethod
-	def register(cls, name, pw, email = None):
-		pw_hash = make_pw_hash(name, pw)
-		return User(
-					name = name,
-					pw_hash = pw_hash,
-					email = email)
-	@classmethod
-	def login(cls, name, pw):
-		u = cls.by_name(name)
-		if u and valid_pw(name, pw, u.pw_hash):
-			return u
 
 		# Sign-Up Page
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -250,6 +211,8 @@ class PostCreate(BaseHandler):
 	def get(self):
 		if self.user:
 			self.render("blog_forms.html")
+		else:
+			self.redirect('/login')
 
 	def post(self):
 		if not self.user:
@@ -263,7 +226,7 @@ class PostCreate(BaseHandler):
 
 		# to store the element in the database
 		if subject and content:
-			p = Post(subject=subject, content=content, author=author, likes=likes)
+			p = Post(subject=subject, content=content, author=author, likes=likes, dislikes=dislikes)
 			p.put()
 			self.redirect('/blog/%s' % str(p.key().id()))
 		else:
@@ -280,15 +243,22 @@ class EditPost(BaseHandler):
 			self.error(404)
 			return
 
+		if not self.user:
+			return self.redirect('/login')
+
+
 		if self.user.name == p.author:
 			self.render("blog_edit.html", p=p, subject=p.subject, content=p.content)
 		else:
-			error = "Login to edit your post"
-			return self.render('login.html', error=error)
+			error = "You don't have access to edit this code"
+			return self.render('blog_front.html', message=error)
 
 	def post(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
+
+		if not p:
+			return self.redirect('/blog')
 
 		subject = self.request.get("subject")
 		content = self.request.get("content")
@@ -311,10 +281,19 @@ class LikeHandler(BaseHandler):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
 
+		if not p :
+			return self.redirect('/blog')
+
+		if not self.user:
+			return self.redirect('/login')
+
 		p.likes = p.likes+1
 		p.likers.append(self.user.name)
 
-		if self.user.name != p.author:
+		if self.user.name == p.author:
+			error="You cannot like your own post!"
+			return self.render("blog_front.html", message=error)
+		else:
 			p.put()
 			time.sleep(0.1)
 			self.redirect("/blog")
@@ -324,10 +303,19 @@ class DislikeHandler(BaseHandler):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
 
+		if not p :
+			return self.redirect('/blog')
+
+		if not self.user:
+			return self.redirect('/login')
+
 		p.dislikes = p.dislikes+1
 		p.dislikers.append(self.user.name)
 
-		if self.user.name != p.author:
+		if self.user.name == p.author:
+			error="You cannot dislike your own post!"
+			return self.render("blog_front.html", message=error)
+		else:
 			p.put()
 			time.sleep(0.1)
 			self.redirect("/blog")
@@ -338,17 +326,19 @@ class DeletePost(BaseHandler):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
 
+		if not p:
+			return self.redirect('/blog')
+
+		if not self.user:
+			return self.redirect('/login')
+
 		if self.user.name == p.author:
 			p.delete()
 			message = "Post Deleted!"
 			self.render("blog_front.html", p=p, message=message)
-
-class Comment(db.Model):
-	"""class that creates the basic database specifics for a comment"""
-	comment = db.TextProperty(required=True)
-	commentauthor = db.StringProperty(required=True)
-	commentid = db.IntegerProperty(required=True)
-	created = db.DateTimeProperty(auto_now_add=True)
+		else:
+			error = "You don't have permission to delete this post"
+			return self.render("blog_front.html", message=error)
 
 class CreateComment(BaseHandler):
 	"""class that handles a new comment"""
@@ -356,11 +346,20 @@ class CreateComment(BaseHandler):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
 
-		if self.user:
+		if not p:
+			self.error(404)
+			return
+
+		if not self.user:
+			self.redirect("/login")
+		else:
 			self.render("newcomment.html", p=p, subject=p.subject,
 						content=p.content)
 
 	def post(self, post_id):
+		if not self.user:
+			return self.redirect("/login")
+
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
 
@@ -369,16 +368,15 @@ class CreateComment(BaseHandler):
 		commentauthor = self.user.name
 		commentid = int(p.key().id())
 
-		if self.user:
-			if commentauthor and comment and commentid:
-				c = Comment(comment=comment, commentauthor=commentauthor, commentid=commentid)
-				c.put()
-				time.sleep(0.1)
-				self.redirect("/blog")
-			else:
-				error = "Enter your text in the comment box"
-				return self.render("newcomment.html", p=p, subject=p.subject,
-							 content=p.content, error=error)
+		if commentauthor and comment and commentid:
+			c = Comment(comment=comment, commentauthor=commentauthor, commentid=commentid)
+			c.put()
+			time.sleep(0.1)
+			self.redirect("/blog")
+		else:
+			error = "Enter your text in the comment box"
+			return self.render("newcomment.html", p=p, subject=p.subject,
+						 content=p.content, error=error)
 
 class EditComment(BaseHandler):
 	"""class that let's a user edit his or her own comment"""
@@ -388,23 +386,32 @@ class EditComment(BaseHandler):
 
 		if not c:
 			self.error(404)
-			return self.render("404.html")
+			return
 
 		commented = c.comment.replace('<br>', '')
 
-		if self.user:
+		if not self.user:
+			return self.redirect('/login')
+
+		if not self.user.name == c.commentauthor:
+			error="You can only edit your own comment!"
+			return self.render("blog_front.html", message=error)
+		else:
 			self.render("editcomment.html", c=c, commented=commented)
 
 	def post(self, comment_id):
 		key = db.Key.from_path('Comment', int(comment_id))
 		c = db.get(key)
 
+		if not c:
+			return self.redirect("/blog")
+
 		commentin = self.request.get("comment")
 		comment = commentin.replace('\n', '<br>')
 		commentid = c.commentid
 		commentauthor = c.commentauthor
 
-		if self.user:
+		if self.user and self.user.name == c.commentauthor:
 			if commentauthor and comment and commentid:
 				c.comment = comment
 				c.commentauthor = commentauthor
@@ -421,9 +428,19 @@ class DeleteComment(BaseHandler):
 		key = db.Key.from_path('Comment', int(comment_id))
 		c = db.get(key)
 
-		c.delete()
-		message = "Comment Deleted!"
-		self.render("blog_front.html", c=c, message=message)
+		if not c:
+			return self.redirect("/blog")
+
+		if not self.user:
+			return self.redirect("/login")
+
+		if self.user.name != c.commentauthor:
+			error="You can delete only your own comments"
+			return self.render("blog_front.html",message=error)
+		else:
+			c.delete()
+			message = "Comment Deleted!"
+			self.render("blog_front.html", c=c, message=message)
 
 app = webapp2.WSGIApplication([('/', FirstPage),
 							 ('/blog', Blog),

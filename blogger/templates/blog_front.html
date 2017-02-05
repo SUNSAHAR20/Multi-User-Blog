@@ -9,8 +9,6 @@
 		<div class="post_footer">
 		{{ p.author }}
 		<br><br>
-		{% if user.name %}
-			{% if p.author == user.name %}
 				<form action="/blog/edit/{{p.key().id()}}" class="edit_btn">
 					<input type="submit" value="Edit Post">
 				</form>
@@ -18,8 +16,6 @@
 					<input type="submit" value="Delete Post">
 				</form>
 				<br><br>
-			{% endif %}
-		{% endif %}
 
 		{% if p.likes == 1 %}
 			{{ p.likes }} user likes the post
@@ -35,13 +31,11 @@
 
 		<br><br>
 
-		{% if user.name %}
 			<form method="get" action="/blog/newcomment/{{p.key().id()}}" class="edit_btn">
 				<input type="submit" value="Comment on Post">
 			</form>
 		<br><br>
 
-			{% if p.author != user.name %}
 				{% if user.name not in p.likers %}
 					{% if user.name not in p.dislikers %}
 						<form method="post" action="/blog/like/{{p.key().id()}}" class="delete_btn">
@@ -56,8 +50,6 @@
 						</form>
 					{% endif %}
 				{% endif %}
-			{% endif %}
-		{% endif %}
 
 			<br>
 			<div class="post_comment">
@@ -73,16 +65,12 @@
 								by {{ c.commentauthor }} on {{ c.created.strftime("%b %d, %Y") }}
 							</span>
 							<br><br>
-							{% if user.name %}
-								{% if c.commentauthor == user.name %}
 									<form method="get" action="/blog/editcomment/{{c.key().id()}}">
 										<input type="submit" value="Edit comment" class="edit_btn">
 									</form>
 									<form method="get" action="/blog/deletecomment/{{c.key().id()}}">
 										<input type="submit" value="Delete Comment" class="delete_btn">
 									</form>
-								{% endif %}
-							{% endif %}
 							<br><br>
 						</div>
 					{% endif %}
