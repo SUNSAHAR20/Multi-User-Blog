@@ -12,7 +12,7 @@ from comment import Comment
 SECRET = 'imsosecret'
 from google.appengine.ext import db
 
-        #For loading the jijnja2 template into the app
+		#For loading the jijnja2 template into the app
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=True)
 
@@ -30,8 +30,8 @@ def check_secure_val(h):
 
 		#Function for not class BaseHandler string rendering
 def render_str(template, ** params):
-    t = jinja_env.get_template(template)
-    return t.render(params)
+	t = jinja_env.get_template(template)
+	return t.render(params)
 
 		#Main Page Basehandler(Templates)
 class BaseHandler(webapp2.RequestHandler):
@@ -63,8 +63,6 @@ class BaseHandler(webapp2.RequestHandler):
 
 	def logout(self):
 		self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
-
-		#Functions for salting
 
 		#Class to direct to right blog page
 class FirstPage(BaseHandler):
@@ -233,8 +231,8 @@ class PostCreate(BaseHandler):
 			error = "Please Fill up subject and content!"
 			self.render("blog_forms.html", subject=subject, content=content, error=error)
 
+		#class that allows post authors to edit their posts
 class EditPost(BaseHandler):
-	"""class that opens an existing post for editing"""
 	def get(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
@@ -274,9 +272,8 @@ class EditPost(BaseHandler):
 				self.render("blog_edit.html", p=p, subject=subject, content=content,
 							 error=error)
 
+		#Class that allows logged in users to like other's posts
 class LikeHandler(BaseHandler):
-	"""class that handles likes for a blogpost, updating the posts number of
-	 likes and the people who have liked it"""
 	def post(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
@@ -298,6 +295,7 @@ class LikeHandler(BaseHandler):
 			time.sleep(0.1)
 			self.redirect("/blog")
 
+		#Class that allows logged in users to dilike other's posts
 class DislikeHandler(BaseHandler):
 	def post(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
@@ -320,8 +318,8 @@ class DislikeHandler(BaseHandler):
 			time.sleep(0.1)
 			self.redirect("/blog")
 
+		#Class to delete a post
 class DeletePost(BaseHandler):
-	"""class for deleting a blog post"""
 	def get(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
@@ -340,8 +338,8 @@ class DeletePost(BaseHandler):
 			error = "You don't have permission to delete this post"
 			return self.render("blog_front.html", message=error)
 
+		# Class that allows the creation of a comment on a post
 class CreateComment(BaseHandler):
-	"""class that handles a new comment"""
 	def get(self, post_id):
 		key = db.Key.from_path('Post', int(post_id))
 		p = db.get(key)
@@ -378,8 +376,8 @@ class CreateComment(BaseHandler):
 			return self.render("newcomment.html", p=p, subject=p.subject,
 						 content=p.content, error=error)
 
+		#Class that allows to edit the comment made on a particular post
 class EditComment(BaseHandler):
-	"""class that let's a user edit his or her own comment"""
 	def get(self, comment_id):
 		key = db.Key.from_path('Comment', int(comment_id))
 		c = db.get(key)
@@ -422,8 +420,8 @@ class EditComment(BaseHandler):
 				error = "Enter your text in the Comment box!"
 				return self.render("editcomment.html", c=c, commented=c.comment)
 
+		#Class that allows a user delete his comment
 class DeleteComment(BaseHandler):
-	"""class for deleting a comment"""
 	def get(self, comment_id):
 		key = db.Key.from_path('Comment', int(comment_id))
 		c = db.get(key)
